@@ -1,8 +1,290 @@
 {
-  "name": "sentinel_analysis",
-  "nodes": [],
-  "connections": {},
-  "meta": {
-    "note": "Placeholder export. Real workflow will be exported here in Phase 2."
-  }
+  "name": "Sentinel Analysis",
+  "nodes": [
+    {
+      "id": "f1ef0718-7356-4a03-8b3b-1aa398db560d",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "6377fea8-b812-4eb1-9b4e-cef86f03b86a",
+      "name": "Read Corpus",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForAllItems",
+        "jsCode": "const fs = require('fs');\nconst path = require('path');\n\n// Requires n8n env var NODE_FUNCTION_ALLOW_BUILTIN=fs,path so the Code\n// node sandbox is permitted to require these Node builtins.\nconst baseDir = '/data/test_corpus/sample_app_clean';\n\nfunction walk(dir) {\n  let files = [];\n  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {\n    const fullPath = path.join(dir, entry.name);\n    if (entry.isDirectory()) {\n      files = files.concat(walk(fullPath));\n    } else if (entry.isFile() && entry.name.endsWith('.py')) {\n      files.push(fullPath);\n    }\n  }\n  return files;\n}\n\nconst files = walk(baseDir).map((filePath) => ({\n  filename: filePath,\n  content: fs.readFileSync(filePath, 'utf8'),\n}));\n\n// Single item so downstream LLM nodes each run once with the FULL corpus,\n// not once per file.\nreturn [{ json: { files } }];\n"
+      }
+    },
+    {
+      "id": "082fae92-6c54-4f69-a21e-7ef36046332b",
+      "name": "Security Analyst",
+      "type": "n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        140,
+        80
+      ],
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "={{$json.files.map(f => '=== ' + f.filename + ' ===\\n' + f.content).join('\\n\\n')}}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {
+          "system": "You are a security-focused code reviewer. Given source code, identify security vulnerabilities\nONLY (injection risks, hardcoded secrets/credentials, unsafe deserialization, path traversal,\ninsecure defaults, etc). Ignore performance, style, and test coverage entirely \u2014 that is not\nyour job.\n\nRespond with ONLY a JSON array, no prose, no markdown fences. Each finding:\n{\"category\": \"security\", \"file\": \"<filename>\", \"line\": <int or null>, \"severity\": \"high|medium|low\",\n\"description\": \"<one sentence>\", \"rationale\": \"<why this is a risk>\"}\n\nIf no issues found, respond with [].",
+          "maxTokens": 4096,
+          "temperature": 0,
+          "includeMergedResponse": true
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "id": "7381f139-6cd5-4b53-be6d-f093c275c6b4",
+      "name": "Performance Analyst",
+      "type": "n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        140,
+        300
+      ],
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "={{$json.files.map(f => '=== ' + f.filename + ' ===\\n' + f.content).join('\\n\\n')}}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {
+          "system": "You are a performance-focused code reviewer. Given source code, identify performance issues\nONLY (N+1 query patterns, unnecessary loops/recomputation, poor algorithmic complexity,\nunbounded memory growth, etc). Ignore security, style, and test coverage entirely.\n\nRespond with ONLY a JSON array, no prose, no markdown fences. Each finding:\n{\"category\": \"performance\", \"file\": \"<filename>\", \"line\": <int or null>, \"severity\": \"high|medium|low\",\n\"description\": \"<one sentence>\", \"rationale\": \"<why this hurts performance>\"}\n\nIf no issues found, respond with [].",
+          "maxTokens": 4096,
+          "temperature": 0,
+          "includeMergedResponse": true
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "id": "5217d88f-359e-4746-947a-29e55a4570a0",
+      "name": "Style & Test Coverage Analyst",
+      "type": "n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        140,
+        520
+      ],
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "={{$json.files.map(f => '=== ' + f.filename + ' ===\\n' + f.content).join('\\n\\n')}}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {
+          "system": "You are a code style and test-coverage reviewer. Given source code (and test files if present),\nidentify TWO kinds of issues ONLY: (1) style/convention violations (poor naming, missing\ndocstrings, inconsistent conventions), and (2) functions/methods with no corresponding test\ncoverage. Ignore security and performance entirely.\n\nRespond with ONLY a JSON array, no prose, no markdown fences. Each finding:\n{\"category\": \"style|test_coverage\", \"file\": \"<filename>\", \"line\": <int or null>,\n\"severity\": \"high|medium|low\", \"description\": \"<one sentence>\", \"rationale\": \"<why this matters>\"}\n\nIf no issues found, respond with [].",
+          "maxTokens": 4096,
+          "temperature": 0,
+          "includeMergedResponse": true
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "id": "d07bc410-cd9a-439f-ba2a-4c8758ae8370",
+      "name": "Merge Findings",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 3
+      }
+    },
+    {
+      "id": "e022f479-293b-439e-8ca8-d51885a4a892",
+      "name": "Synthesize Findings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Order here must match the order branches are wired into the Merge node\n// (Security -> input 0, Performance -> input 1, Style/Test Coverage -> input 2)\n// since Merge in \"append\" mode preserves that order.\nconst AGENT_NAMES = ['security_analyst', 'performance_analyst', 'style_test_coverage_analyst'];\n\nfunction extractRawText(item) {\n  if (typeof item.json.merged_response === 'string') return item.json.merged_response;\n  if (Array.isArray(item.json.content)) {\n    return item.json.content.filter((c) => c.type === 'text').map((c) => c.text).join('');\n  }\n  return '';\n}\n\nfunction parseAgentOutput(item) {\n  const raw = extractRawText(item).trim();\n  try {\n    const parsed = JSON.parse(raw);\n    return Array.isArray(parsed) ? parsed : [];\n  } catch (err) {\n    return [];\n  }\n}\n\nfunction dedupeKey(finding) {\n  const shortDescription = String(finding.description || '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, ' ')\n    .trim()\n    .split(' ')\n    .slice(0, 6)\n    .join(' ');\n  return [finding.file, finding.category, shortDescription].join('|');\n}\n\nconst items = $input.all();\nconst allFindings = [];\n\nitems.forEach((item, index) => {\n  const agentFindings = parseAgentOutput(item);\n  agentFindings.forEach((finding) => {\n    allFindings.push({ ...finding, source_agent: AGENT_NAMES[index] || `agent_${index}` });\n  });\n});\n\nconst deduped = new Map();\nfor (const finding of allFindings) {\n  const key = dedupeKey(finding);\n  if (!deduped.has(key)) {\n    deduped.set(key, finding);\n  }\n}\n\nconst findings = Array.from(deduped.values());\nconst payload = JSON.stringify({ findings, generated_at: new Date().toISOString() }, null, 2);\n\nreturn [{\n  json: { findings, count: findings.length },\n  binary: {\n    data: await this.helpers.prepareBinaryData(Buffer.from(payload, 'utf8'), 'findings.json', 'application/json'),\n  },\n}];\n"
+      }
+    },
+    {
+      "id": "d2e02283-5db0-476f-9e02-d1fa07dee910",
+      "name": "Write Findings to Disk",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "operation": "write",
+        "fileName": "/data/n8n_workflows/output/findings.json",
+        "dataPropertyName": "data",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Corpus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Corpus": {
+      "main": [
+        [
+          {
+            "node": "Security Analyst",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Performance Analyst",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Style & Test Coverage Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Security Analyst": {
+      "main": [
+        [
+          {
+            "node": "Merge Findings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Performance Analyst": {
+      "main": [
+        [
+          {
+            "node": "Merge Findings",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Style & Test Coverage Analyst": {
+      "main": [
+        [
+          {
+            "node": "Merge Findings",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Findings": {
+      "main": [
+        [
+          {
+            "node": "Synthesize Findings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Synthesize Findings": {
+      "main": [
+        [
+          {
+            "node": "Write Findings to Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
 }

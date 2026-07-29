@@ -7,8 +7,12 @@ services:
     image: n8nio/n8n:latest
     ports:
       - "5678:5678"
+    environment:
+      - NODE_FUNCTION_ALLOW_BUILTIN=fs,path
+      - N8N_RESTRICT_FILE_ACCESS_TO=/data
     volumes:
       - ./n8n_workflows:/workflows
+      - .:/data
 
   langgraph_service:
     build: ./langgraph_service
