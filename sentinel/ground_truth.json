@@ -1,0 +1,39 @@
+{
+  "issues": [
+    {
+      "id": "SEC-001",
+      "category": "security",
+      "file": "test_corpus/sample_app/db.py",
+      "description": "get_user_by_name() builds a SQL query via raw string concatenation of user input, enabling SQL injection.",
+      "severity": "high"
+    },
+    {
+      "id": "SEC-002",
+      "category": "security",
+      "file": "test_corpus/sample_app/api.py",
+      "description": "API_KEY is a hardcoded secret string defined as a module-level constant.",
+      "severity": "high"
+    },
+    {
+      "id": "PERF-001",
+      "category": "performance",
+      "file": "test_corpus/sample_app/db.py",
+      "description": "get_users_by_ids() issues one DB query per id inside a loop (N+1 query pattern) instead of a single batched query.",
+      "severity": "medium"
+    },
+    {
+      "id": "STYLE-001",
+      "category": "style",
+      "file": "test_corpus/sample_app/utils.py",
+      "description": "f(x, y) has a non-descriptive name, no docstring, and the file mixes camelCase (formatUserName) with snake_case (calculate_total) naming conventions.",
+      "severity": "low"
+    },
+    {
+      "id": "TEST-001",
+      "category": "test_coverage",
+      "file": "test_corpus/sample_app/tests/test_utils.py",
+      "description": "Only calculate_total() is covered by tests; formatUserName() and f() in utils.py have zero test coverage.",
+      "severity": "medium"
+    }
+  ]
+}

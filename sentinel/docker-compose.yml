@@ -1,0 +1,18 @@
+# Placeholder compose file. Services will be fleshed out alongside Phase 2 (n8n)
+# and Phase 4 (langgraph_service) work.
+version: "3.8"
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./n8n_workflows:/workflows
+
+  langgraph_service:
+    build: ./langgraph_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - n8n
