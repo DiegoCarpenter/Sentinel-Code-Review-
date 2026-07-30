@@ -12,3 +12,29 @@ Flask-style app used to evaluate the pipeline end-to-end: it seeds one known iss
 poorly named/undocumented function in `utils.py`, and a test file that only covers one of three
 functions), with the expected findings recorded in `ground_truth.json` so precision/recall can
 be scored automatically against what the agents actually detect.
+
+## Running with Docker
+
+`docker compose up -d n8n` starts the n8n container, which serves the analysis workflow
+(`n8n_workflows/sentinel_analysis.json`) that reads `test_corpus/sample_app_clean/` and writes
+`n8n_workflows/output/findings.json`.
+
+Once findings exist, run the Planning Agent in its own container:
+
+```
+docker compose run langgraph_service python planner.py
+```
+
+This builds the `langgraph_service` image (Python 3.12, `langgraph_service/Dockerfile`),
+reads `n8n_workflows/output/findings.json`, and writes `langgraph_service/output/refactor_plan.json`
+back to the host via the mounted `langgraph_service/output` volume. `env_file: .env` makes
+`ANTHROPIC_API_KEY` available inside the container for the planner's LLM dependency pass.
+
+The HITL refactor executor (`langgraph_service/graph.py`) is **not** meant to run in a
+container: its `human_approval` step blocks on a real `input()` call in the terminal, and a
+containerized process doesn't reliably have a TTY attached. Run it locally instead, in a venv
+with `requirements.txt` installed:
+
+```
+python langgraph_service/graph.py
+```

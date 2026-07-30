@@ -1,0 +1,7 @@
+.git
+.venv
+.env
+**/__pycache__
+langgraph_service/output
+langgraph_service/working_copy
+n8n_workflows/output

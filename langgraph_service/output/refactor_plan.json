@@ -137,7 +137,7 @@
         "test_coverage"
       ]
     },
-    "dependency_reason": "Fixing the SQL injection (switching to parameterized queries) and fixing the N+1 pattern (batching into one query) both rewrite get_users_by_ids, so the security fix should be done first to avoid rewriting the same function twice."
+    "dependency_reason": "Fixing the SQL injection (switching to parameterized queries) and fixing the N+1 pattern (batching into one query) both rewrite get_users_by_ids, so the security fix should be done first to avoid conflicting rewrites."
   },
   {
     "step_number": 10,
@@ -189,7 +189,7 @@
         "security"
       ]
     },
-    "dependency_reason": "The SQL injection in get_users_by_ids must be fixed before writing tests, otherwise tests would validate vulnerable behavior.; The N+1 query pattern in get_users_by_ids should be refactored to a batched query before tests are written, since the fix changes the function's structure and behavior under test."
+    "dependency_reason": "The SQL injection in get_users_by_ids must be fixed before writing tests, otherwise tests would validate the vulnerable implementation.; The N+1 query pattern in get_users_by_ids should be refactored to a batched query before tests are written, since the fix changes the function's structure and behavior being tested."
   },
   {
     "step_number": 13,
@@ -203,7 +203,7 @@
       "source_agent": "style_test_coverage_analyst",
       "id": "api.py:13:test_coverage"
     },
-    "dependency_reason": "The hardcoded API key should be moved to configuration before tests for get_users are written, so tests do not embed or depend on the hardcoded secret.; api.py's get_users delegates to get_users_by_ids, so the SQL injection fix in get_users_by_ids must land before tests for get_users are written against correct behavior.; api.py's get_users delegates to get_users_by_ids, so the N+1 batching refactor must land before tests for get_users are written to avoid testing the wrong implementation."
+    "dependency_reason": "The hardcoded API key should be removed before tests are written for get_users, so tests do not embed or depend on the hardcoded secret.; get_users in api.py delegates to get_users_by_ids, so the SQL injection fix must land before tests for get_users are written against a correct implementation.; get_users delegates to get_users_by_ids, so the N+1 refactor should be complete before tests for get_users are written to avoid testing a discarded implementation."
   },
   {
     "step_number": 14,
@@ -217,6 +217,6 @@
       "source_agent": "style_test_coverage_analyst",
       "id": "api.py:8:test_coverage"
     },
-    "dependency_reason": "The hardcoded API key should be moved to configuration before tests for get_user are written, so tests do not embed or depend on the hardcoded secret.; api.py's get_user delegates to get_user_by_name, so the SQL injection fix in get_user_by_name must land before tests for get_user are written against correct behavior.; api.py's get_user calls get_user_by_name which returns data formatted by formatUserName; if formatUserName is renamed, any test fixtures or assertions for get_user that depend on its output must use the updated name."
+    "dependency_reason": "The hardcoded API key should be removed and replaced with a config/env mechanism before tests are written for get_user, so tests are not written around a hardcoded-key assumption.; get_user in api.py delegates to get_user_by_name, so the SQL injection fix must land before tests for get_user are written against a correct implementation.; api.py's get_user calls get_user_by_name which returns data formatted by formatUserName; if formatUserName is renamed, any test for get_user referencing the helper by name must use the updated identifier."
   }
 ]

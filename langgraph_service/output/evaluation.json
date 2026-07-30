@@ -1,0 +1,383 @@
+{
+  "detection": {
+    "ground_truth_count": 5,
+    "findings_count": 24,
+    "true_positives": {
+      "count": 4,
+      "issues": [
+        {
+          "id": "SEC-001",
+          "category": "security",
+          "file": "test_corpus/sample_app/db.py",
+          "description": "get_user_by_name() builds a SQL query via raw string concatenation of user input, enabling SQL injection.",
+          "severity": "high",
+          "matched_findings": [
+            {
+              "category": "security",
+              "file": "/data/test_corpus/sample_app_clean/db.py",
+              "line": 14,
+              "severity": "high",
+              "description": "SQL injection vulnerability via unsanitized string concatenation in get_user_by_name.",
+              "rationale": "User-supplied 'name' is concatenated directly into the SQL query without parameterization or escaping, allowing an attacker to manipulate the query structure and access or modify arbitrary data.",
+              "source_agent": "security_analyst"
+            },
+            {
+              "category": "security",
+              "file": "/data/test_corpus/sample_app_clean/db.py",
+              "line": 20,
+              "severity": "high",
+              "description": "SQL injection vulnerability via unsanitized f-string interpolation in get_users_by_ids.",
+              "rationale": "Each user_id from the comma-split request parameter is interpolated directly into the SQL query without parameterization, allowing an attacker to inject arbitrary SQL through the 'ids' query parameter.",
+              "source_agent": "security_analyst"
+            }
+          ]
+        },
+        {
+          "id": "SEC-002",
+          "category": "security",
+          "file": "test_corpus/sample_app/api.py",
+          "description": "API_KEY is a hardcoded secret string defined as a module-level constant.",
+          "severity": "high",
+          "matched_findings": [
+            {
+              "category": "security",
+              "file": "/data/test_corpus/sample_app_clean/api.py",
+              "line": 5,
+              "severity": "high",
+              "description": "Hardcoded API key embedded directly in source code.",
+              "rationale": "The secret 'sk-live-4f8a9b2c1d3e4f5a6b7c8d9e0f1a2b3c' is committed in plaintext, exposing it to anyone with repository access and making rotation difficult without a code change.",
+              "source_agent": "security_analyst"
+            }
+          ]
+        },
+        {
+          "id": "PERF-001",
+          "category": "performance",
+          "file": "test_corpus/sample_app/db.py",
+          "description": "get_users_by_ids() issues one DB query per id inside a loop (N+1 query pattern) instead of a single batched query.",
+          "severity": "medium",
+          "matched_findings": [
+            {
+              "category": "performance",
+              "file": "/data/test_corpus/sample_app_clean/db.py",
+              "line": 20,
+              "severity": "high",
+              "description": "N+1 query pattern: `get_users_by_ids` issues one separate SQL query per user ID in a loop instead of a single batched query.",
+              "rationale": "Each iteration executes a round-trip to the database, so fetching N users costs N queries; a single `SELECT * FROM users WHERE id IN (...)` would reduce this to one query regardless of input size.",
+              "source_agent": "performance_analyst"
+            }
+          ]
+        },
+        {
+          "id": "STYLE-001",
+          "category": "style",
+          "file": "test_corpus/sample_app/utils.py",
+          "description": "f(x, y) has a non-descriptive name, no docstring, and the file mixes camelCase (formatUserName) with snake_case (calculate_total) naming conventions.",
+          "severity": "low",
+          "matched_findings": [
+            {
+              "category": "style",
+              "file": "/data/test_corpus/sample_app_clean/utils.py",
+              "line": 9,
+              "severity": "high",
+              "description": "Function `formatUserName` uses camelCase instead of the PEP 8 snake_case convention for Python function names.",
+              "rationale": "Inconsistent naming conventions reduce readability and violate PEP 8, making the codebase harder to maintain.",
+              "source_agent": "style_test_coverage_analyst"
+            },
+            {
+              "category": "style",
+              "file": "/data/test_corpus/sample_app_clean/utils.py",
+              "line": 9,
+              "severity": "medium",
+              "description": "Function `formatUserName` is missing a docstring.",
+              "rationale": "Docstrings are required for public functions to document intent and parameters, consistent with the rest of the module.",
+              "source_agent": "style_test_coverage_analyst"
+            },
+            {
+              "category": "style",
+              "file": "/data/test_corpus/sample_app_clean/utils.py",
+              "line": 13,
+              "severity": "high",
+              "description": "Function `f` has a non-descriptive single-character name that conveys no information about its purpose.",
+              "rationale": "Meaningful names are essential for readability and maintainability; `f` gives no indication of what the function computes.",
+              "source_agent": "style_test_coverage_analyst"
+            },
+            {
+              "category": "style",
+              "file": "/data/test_corpus/sample_app_clean/utils.py",
+              "line": 13,
+              "severity": "medium",
+              "description": "Function `f` is missing a docstring.",
+              "rationale": "Without a docstring, the function's intent, parameters, and return value are completely opaque to readers.",
+              "source_agent": "style_test_coverage_analyst"
+            }
+          ]
+        }
+      ]
+    },
+    "false_negatives": {
+      "count": 1,
+      "issues": [
+        {
+          "id": "TEST-001",
+          "category": "test_coverage",
+          "file": "test_corpus/sample_app/tests/test_utils.py",
+          "description": "Only calculate_total() is covered by tests; formatUserName() and f() in utils.py have zero test coverage.",
+          "severity": "medium"
+        }
+      ]
+    },
+    "false_positives": {
+      "count": 16,
+      "findings": [
+        {
+          "category": "style",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 8,
+          "severity": "medium",
+          "description": "Function `get_user` is missing a docstring.",
+          "rationale": "Public API functions should document their parameters and return values for maintainability.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "style",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 13,
+          "severity": "medium",
+          "description": "Function `get_users` is missing a docstring.",
+          "rationale": "Public API functions should document their parameters and return values for maintainability.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "style",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 18,
+          "severity": "medium",
+          "description": "Function `healthcheck` is missing a docstring.",
+          "rationale": "Public API functions should document their parameters and return values for maintainability.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "style",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 5,
+          "severity": "low",
+          "description": "Function `get_connection` is missing a docstring.",
+          "rationale": "Even stub/placeholder functions benefit from docstrings explaining their intended contract.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "style",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 10,
+          "severity": "low",
+          "description": "Function `execute_query` is missing a docstring.",
+          "rationale": "Docstrings clarify the expected query format and return type for callers.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "style",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 15,
+          "severity": "low",
+          "description": "Function `get_user_by_name` is missing a docstring.",
+          "rationale": "Docstrings are needed to document parameters and return values for maintainability.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "style",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 20,
+          "severity": "low",
+          "description": "Function `get_users_by_ids` is missing a docstring.",
+          "rationale": "Docstrings are needed to document parameters and return values for maintainability.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 8,
+          "severity": "high",
+          "description": "Function `get_user` has no corresponding test coverage.",
+          "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 13,
+          "severity": "high",
+          "description": "Function `get_users` has no corresponding test coverage.",
+          "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 18,
+          "severity": "medium",
+          "description": "Function `healthcheck` has no corresponding test coverage.",
+          "rationale": "Even simple functions should be tested to guard against accidental breakage.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 5,
+          "severity": "high",
+          "description": "Function `get_connection` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 10,
+          "severity": "high",
+          "description": "Function `execute_query` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 15,
+          "severity": "high",
+          "description": "Function `get_user_by_name` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 20,
+          "severity": "high",
+          "description": "Function `get_users_by_ids` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/utils.py",
+          "line": 9,
+          "severity": "high",
+          "description": "Function `formatUserName` has no corresponding test coverage.",
+          "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/utils.py",
+          "line": 13,
+          "severity": "high",
+          "description": "Function `f` has no corresponding test coverage.",
+          "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        }
+      ]
+    },
+    "precision": 0.2,
+    "recall": 0.8,
+    "f1": 0.32000000000000006,
+    "high_severity_precision": {
+      "value": 0.3333333333333333,
+      "false_positive_count": 8,
+      "false_positives": [
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 8,
+          "severity": "high",
+          "description": "Function `get_user` has no corresponding test coverage.",
+          "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 13,
+          "severity": "high",
+          "description": "Function `get_users` has no corresponding test coverage.",
+          "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 5,
+          "severity": "high",
+          "description": "Function `get_connection` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 10,
+          "severity": "high",
+          "description": "Function `execute_query` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 15,
+          "severity": "high",
+          "description": "Function `get_user_by_name` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 20,
+          "severity": "high",
+          "description": "Function `get_users_by_ids` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/utils.py",
+          "line": 9,
+          "severity": "high",
+          "description": "Function `formatUserName` has no corresponding test coverage.",
+          "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        },
+        {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/utils.py",
+          "line": 13,
+          "severity": "high",
+          "description": "Function `f` has no corresponding test coverage.",
+          "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+          "source_agent": "style_test_coverage_analyst"
+        }
+      ]
+    }
+  },
+  "execution": {
+    "run_status": "interrupted_by_user",
+    "total_steps": 14,
+    "completed": {
+      "count": 3,
+      "pct": 21.4
+    },
+    "rejected": {
+      "count": 1,
+      "pct": 7.1
+    },
+    "skipped": {
+      "count": 1,
+      "pct": 7.1
+    },
+    "not_reached": {
+      "count": 9,
+      "pct": 64.3
+    },
+    "syntax_regressions_introduced": 0,
+    "py_compile_passed_for_all_completed_steps": true
+  }
+}
