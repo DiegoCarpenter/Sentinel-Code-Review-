@@ -1,0 +1,98 @@
+{
+  "run_status": "interrupted_by_user",
+  "total_steps": 14,
+  "completed": {
+    "count": 3,
+    "steps": [
+      {
+        "step_number": 1,
+        "finding": {
+          "category": "security",
+          "file": "/data/test_corpus/sample_app_clean/api.py",
+          "line": 5,
+          "severity": "high",
+          "description": "Hardcoded API key embedded directly in source code.",
+          "rationale": "The secret 'sk-live-4f8a9b2c1d3e4f5a6b7c8d9e0f1a2b3c' is committed in plaintext, exposing it to anyone with repository access and making rotation difficult without a code change.",
+          "source_agent": "security_analyst",
+          "id": "api.py:5:security"
+        },
+        "dependency_reason": "no dependencies",
+        "status": "completed"
+      },
+      {
+        "step_number": 2,
+        "finding": {
+          "category": "security",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 14,
+          "severity": "high",
+          "description": "SQL injection vulnerability via unsanitized string concatenation in get_user_by_name.",
+          "rationale": "User-supplied 'name' is concatenated directly into the SQL query without parameterization or escaping, allowing an attacker to manipulate the query structure and access or modify arbitrary data.",
+          "source_agent": "security_analyst",
+          "id": "db.py:14:security"
+        },
+        "dependency_reason": "no dependencies",
+        "status": "completed"
+      },
+      {
+        "step_number": 4,
+        "finding": {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 5,
+          "severity": "high",
+          "description": "Function `get_connection` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst",
+          "id": "db.py:5:test_coverage"
+        },
+        "dependency_reason": "no dependencies",
+        "status": "completed"
+      }
+    ]
+  },
+  "rejected": {
+    "count": 1,
+    "steps": [
+      {
+        "step_number": 3,
+        "finding": {
+          "category": "security",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 20,
+          "severity": "high",
+          "description": "SQL injection vulnerability via unsanitized f-string interpolation in get_users_by_ids.",
+          "rationale": "Each user_id from the comma-split request parameter is interpolated directly into the SQL query without parameterization, allowing an attacker to inject arbitrary SQL through the 'ids' query parameter.",
+          "source_agent": "security_analyst",
+          "id": "db.py:20:security",
+          "co_located_categories": [
+            "performance",
+            "test_coverage"
+          ]
+        },
+        "dependency_reason": "no dependencies",
+        "status": "reject"
+      }
+    ]
+  },
+  "skipped": {
+    "count": 1,
+    "steps": [
+      {
+        "step_number": 5,
+        "finding": {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/db.py",
+          "line": 10,
+          "severity": "high",
+          "description": "Function `execute_query` has no corresponding test coverage.",
+          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "source_agent": "style_test_coverage_analyst",
+          "id": "db.py:10:test_coverage"
+        },
+        "dependency_reason": "no dependencies",
+        "status": "skip"
+      }
+    ]
+  }
+}
