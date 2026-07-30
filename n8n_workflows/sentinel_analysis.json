@@ -30,7 +30,7 @@
     {
       "id": "082fae92-6c54-4f69-a21e-7ef36046332b",
       "name": "Security Analyst",
-      "type": "n8n-nodes-langchain.anthropic",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
       "position": [
         140,
@@ -70,7 +70,7 @@
     {
       "id": "7381f139-6cd5-4b53-be6d-f093c275c6b4",
       "name": "Performance Analyst",
-      "type": "n8n-nodes-langchain.anthropic",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
       "position": [
         140,
@@ -110,7 +110,7 @@
     {
       "id": "5217d88f-359e-4746-947a-29e55a4570a0",
       "name": "Style & Test Coverage Analyst",
-      "type": "n8n-nodes-langchain.anthropic",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
       "position": [
         140,
@@ -173,7 +173,7 @@
       "parameters": {
         "language": "javaScript",
         "mode": "runOnceForAllItems",
-        "jsCode": "// Order here must match the order branches are wired into the Merge node\n// (Security -> input 0, Performance -> input 1, Style/Test Coverage -> input 2)\n// since Merge in \"append\" mode preserves that order.\nconst AGENT_NAMES = ['security_analyst', 'performance_analyst', 'style_test_coverage_analyst'];\n\nfunction extractRawText(item) {\n  if (typeof item.json.merged_response === 'string') return item.json.merged_response;\n  if (Array.isArray(item.json.content)) {\n    return item.json.content.filter((c) => c.type === 'text').map((c) => c.text).join('');\n  }\n  return '';\n}\n\nfunction parseAgentOutput(item) {\n  const raw = extractRawText(item).trim();\n  try {\n    const parsed = JSON.parse(raw);\n    return Array.isArray(parsed) ? parsed : [];\n  } catch (err) {\n    return [];\n  }\n}\n\nfunction dedupeKey(finding) {\n  const shortDescription = String(finding.description || '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, ' ')\n    .trim()\n    .split(' ')\n    .slice(0, 6)\n    .join(' ');\n  return [finding.file, finding.category, shortDescription].join('|');\n}\n\nconst items = $input.all();\nconst allFindings = [];\n\nitems.forEach((item, index) => {\n  const agentFindings = parseAgentOutput(item);\n  agentFindings.forEach((finding) => {\n    allFindings.push({ ...finding, source_agent: AGENT_NAMES[index] || `agent_${index}` });\n  });\n});\n\nconst deduped = new Map();\nfor (const finding of allFindings) {\n  const key = dedupeKey(finding);\n  if (!deduped.has(key)) {\n    deduped.set(key, finding);\n  }\n}\n\nconst findings = Array.from(deduped.values());\nconst payload = JSON.stringify({ findings, generated_at: new Date().toISOString() }, null, 2);\n\nreturn [{\n  json: { findings, count: findings.length },\n  binary: {\n    data: await this.helpers.prepareBinaryData(Buffer.from(payload, 'utf8'), 'findings.json', 'application/json'),\n  },\n}];\n"
+        "jsCode": "// Order here must match the order branches are wired into the Merge node\n// (Security -> input 0, Performance -> input 1, Style/Test Coverage -> input 2)\n// since Merge in \"append\" mode preserves that order.\nconst AGENT_NAMES = ['security_analyst', 'performance_analyst', 'style_test_coverage_analyst'];\n\nfunction extractRawText(item) {\n  if (typeof item.json.merged_response === 'string') return item.json.merged_response;\n  if (Array.isArray(item.json.content)) {\n    return item.json.content.filter((c) => c.type === 'text').map((c) => c.text).join('');\n  }\n  return '';\n}\n\nfunction stripCodeFences(text) {\n  let result = text.trim();\n  result = result.replace(/^```(?:json)?[ \\t]*\\r?\\n?/, '');\n  result = result.replace(/```[ \\t]*$/, '');\n  return result.trim();\n}\n\nfunction parseAgentOutput(item) {\n  const raw = stripCodeFences(extractRawText(item));\n  try {\n    const parsed = JSON.parse(raw);\n    return Array.isArray(parsed) ? parsed : [];\n  } catch (err) {\n    return [];\n  }\n}\n\nfunction dedupeKey(finding) {\n  const shortDescription = String(finding.description || '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, ' ')\n    .trim()\n    .split(' ')\n    .slice(0, 6)\n    .join(' ');\n  return [finding.file, finding.category, shortDescription].join('|');\n}\n\nconst items = $input.all();\nconst allFindings = [];\n\nitems.forEach((item, index) => {\n  const agentFindings = parseAgentOutput(item);\n  agentFindings.forEach((finding) => {\n    allFindings.push({ ...finding, source_agent: AGENT_NAMES[index] || `agent_${index}` });\n  });\n});\n\nconst deduped = new Map();\nfor (const finding of allFindings) {\n  const key = dedupeKey(finding);\n  if (!deduped.has(key)) {\n    deduped.set(key, finding);\n  }\n}\n\nconst findings = Array.from(deduped.values());\nconst payload = JSON.stringify({ findings, generated_at: new Date().toISOString() }, null, 2);\n\nreturn [{\n  json: { findings, count: findings.length },\n  binary: {\n    data: await this.helpers.prepareBinaryData(Buffer.from(payload, 'utf8'), 'findings.json', 'application/json'),\n  },\n}];\n"
       }
     },
     {
