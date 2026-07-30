@@ -1,6 +1,7 @@
 langgraph
 langchain-anthropic
 networkx
+python-dotenv
 fastapi
 uvicorn
 pytest

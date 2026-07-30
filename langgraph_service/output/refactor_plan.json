@@ -1,0 +1,222 @@
+[
+  {
+    "step_number": 1,
+    "finding": {
+      "category": "security",
+      "file": "/data/test_corpus/sample_app_clean/api.py",
+      "line": 5,
+      "severity": "high",
+      "description": "Hardcoded API key embedded directly in source code.",
+      "rationale": "The secret 'sk-live-4f8a9b2c1d3e4f5a6b7c8d9e0f1a2b3c' is committed in plaintext, exposing it to anyone with repository access and making rotation difficult without a code change.",
+      "source_agent": "security_analyst",
+      "id": "api.py:5:security"
+    },
+    "dependency_reason": "no dependencies"
+  },
+  {
+    "step_number": 2,
+    "finding": {
+      "category": "security",
+      "file": "/data/test_corpus/sample_app_clean/db.py",
+      "line": 14,
+      "severity": "high",
+      "description": "SQL injection vulnerability via unsanitized string concatenation in get_user_by_name.",
+      "rationale": "User-supplied 'name' is concatenated directly into the SQL query without parameterization or escaping, allowing an attacker to manipulate the query structure and access or modify arbitrary data.",
+      "source_agent": "security_analyst",
+      "id": "db.py:14:security"
+    },
+    "dependency_reason": "no dependencies"
+  },
+  {
+    "step_number": 3,
+    "finding": {
+      "category": "security",
+      "file": "/data/test_corpus/sample_app_clean/db.py",
+      "line": 20,
+      "severity": "high",
+      "description": "SQL injection vulnerability via unsanitized f-string interpolation in get_users_by_ids.",
+      "rationale": "Each user_id from the comma-split request parameter is interpolated directly into the SQL query without parameterization, allowing an attacker to inject arbitrary SQL through the 'ids' query parameter.",
+      "source_agent": "security_analyst",
+      "id": "db.py:20:security",
+      "co_located_categories": [
+        "performance",
+        "test_coverage"
+      ]
+    },
+    "dependency_reason": "no dependencies"
+  },
+  {
+    "step_number": 4,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/db.py",
+      "line": 5,
+      "severity": "high",
+      "description": "Function `get_connection` has no corresponding test coverage.",
+      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "db.py:5:test_coverage"
+    },
+    "dependency_reason": "no dependencies"
+  },
+  {
+    "step_number": 5,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/db.py",
+      "line": 10,
+      "severity": "high",
+      "description": "Function `execute_query` has no corresponding test coverage.",
+      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "db.py:10:test_coverage"
+    },
+    "dependency_reason": "no dependencies"
+  },
+  {
+    "step_number": 6,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/utils.py",
+      "line": 9,
+      "severity": "high",
+      "description": "Function `formatUserName` has no corresponding test coverage.",
+      "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "utils.py:9:test_coverage",
+      "co_located_categories": [
+        "style"
+      ]
+    },
+    "dependency_reason": "no dependencies"
+  },
+  {
+    "step_number": 7,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/utils.py",
+      "line": 13,
+      "severity": "high",
+      "description": "Function `f` has no corresponding test coverage.",
+      "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "utils.py:13:test_coverage",
+      "co_located_categories": [
+        "style"
+      ]
+    },
+    "dependency_reason": "no dependencies"
+  },
+  {
+    "step_number": 8,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/db.py",
+      "line": 15,
+      "severity": "high",
+      "description": "Function `get_user_by_name` has no corresponding test coverage.",
+      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "db.py:15:test_coverage"
+    },
+    "dependency_reason": "The SQL injection in get_user_by_name must be fixed before writing tests, otherwise tests would be written against vulnerable code and would need to be rewritten."
+  },
+  {
+    "step_number": 9,
+    "finding": {
+      "category": "performance",
+      "file": "/data/test_corpus/sample_app_clean/db.py",
+      "line": 20,
+      "severity": "high",
+      "description": "N+1 query pattern: `get_users_by_ids` issues one separate SQL query per user ID in a loop instead of a single batched query.",
+      "rationale": "Each iteration executes a round-trip to the database, so fetching N users costs N queries; a single `SELECT * FROM users WHERE id IN (...)` would reduce this to one query regardless of input size.",
+      "source_agent": "performance_analyst",
+      "id": "db.py:20:performance",
+      "co_located_categories": [
+        "security",
+        "test_coverage"
+      ]
+    },
+    "dependency_reason": "Fixing the SQL injection (switching to parameterized queries) and fixing the N+1 pattern (batching into one query) both rewrite get_users_by_ids, so the security fix should be done first to avoid rewriting the same function twice."
+  },
+  {
+    "step_number": 10,
+    "finding": {
+      "category": "style",
+      "file": "/data/test_corpus/sample_app_clean/utils.py",
+      "line": 9,
+      "severity": "high",
+      "description": "Function `formatUserName` uses camelCase instead of the PEP 8 snake_case convention for Python function names.",
+      "rationale": "Inconsistent naming conventions reduce readability and violate PEP 8, making the codebase harder to maintain.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "utils.py:9:style",
+      "co_located_categories": [
+        "test_coverage"
+      ]
+    },
+    "dependency_reason": "style fixes are applied last for utils.py, after utils.py:9:test_coverage; style fixes are applied last for utils.py, after utils.py:13:test_coverage"
+  },
+  {
+    "step_number": 11,
+    "finding": {
+      "category": "style",
+      "file": "/data/test_corpus/sample_app_clean/utils.py",
+      "line": 13,
+      "severity": "high",
+      "description": "Function `f` has a non-descriptive single-character name that conveys no information about its purpose.",
+      "rationale": "Meaningful names are essential for readability and maintainability; `f` gives no indication of what the function computes.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "utils.py:13:style",
+      "co_located_categories": [
+        "test_coverage"
+      ]
+    },
+    "dependency_reason": "style fixes are applied last for utils.py, after utils.py:9:test_coverage; style fixes are applied last for utils.py, after utils.py:13:test_coverage"
+  },
+  {
+    "step_number": 12,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/db.py",
+      "line": 20,
+      "severity": "high",
+      "description": "Function `get_users_by_ids` has no corresponding test coverage.",
+      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "db.py:20:test_coverage",
+      "co_located_categories": [
+        "performance",
+        "security"
+      ]
+    },
+    "dependency_reason": "The SQL injection in get_users_by_ids must be fixed before writing tests, otherwise tests would validate vulnerable behavior.; The N+1 query pattern in get_users_by_ids should be refactored to a batched query before tests are written, since the fix changes the function's structure and behavior under test."
+  },
+  {
+    "step_number": 13,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/api.py",
+      "line": 13,
+      "severity": "high",
+      "description": "Function `get_users` has no corresponding test coverage.",
+      "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "api.py:13:test_coverage"
+    },
+    "dependency_reason": "The hardcoded API key should be moved to configuration before tests for get_users are written, so tests do not embed or depend on the hardcoded secret.; api.py's get_users delegates to get_users_by_ids, so the SQL injection fix in get_users_by_ids must land before tests for get_users are written against correct behavior.; api.py's get_users delegates to get_users_by_ids, so the N+1 batching refactor must land before tests for get_users are written to avoid testing the wrong implementation."
+  },
+  {
+    "step_number": 14,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/api.py",
+      "line": 8,
+      "severity": "high",
+      "description": "Function `get_user` has no corresponding test coverage.",
+      "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "api.py:8:test_coverage"
+    },
+    "dependency_reason": "The hardcoded API key should be moved to configuration before tests for get_user are written, so tests do not embed or depend on the hardcoded secret.; api.py's get_user delegates to get_user_by_name, so the SQL injection fix in get_user_by_name must land before tests for get_user are written against correct behavior.; api.py's get_user calls get_user_by_name which returns data formatted by formatUserName; if formatUserName is renamed, any test fixtures or assertions for get_user that depend on its output must use the updated name."
+  }
+]
