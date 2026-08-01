@@ -32,8 +32,8 @@
       "file": "/data/test_corpus/sample_app_clean/db.py",
       "line": 20,
       "severity": "high",
-      "description": "N+1 query pattern: `get_users_by_ids` issues one separate SQL query per user ID in a loop instead of a single batched query.",
-      "rationale": "Each iteration executes a round-trip to the database, so fetching N users costs N queries; a single `SELECT * FROM users WHERE id IN (...)` would reduce this to one query regardless of input size.",
+      "description": "N+1 query pattern: `get_users_by_ids` issues one separate SQL query per user ID instead of a single batched query.",
+      "rationale": "Each iteration of the loop opens a new query execution round-trip to the database; for N ids this produces N queries, causing latency and connection overhead that grows linearly and could be replaced by a single `WHERE id IN (...)` query.",
       "source_agent": "performance_analyst"
     },
     {
@@ -69,7 +69,7 @@
       "line": 13,
       "severity": "medium",
       "description": "Function `f` is missing a docstring.",
-      "rationale": "Without a docstring, the function's intent, parameters, and return value are completely opaque to readers.",
+      "rationale": "Without a docstring, the function's intent, parameters, and return value are completely opaque to future readers.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
@@ -84,7 +84,7 @@
     {
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/api.py",
-      "line": 13,
+      "line": 12,
       "severity": "medium",
       "description": "Function `get_users` is missing a docstring.",
       "rationale": "Public API functions should document their parameters and return values for maintainability.",
@@ -93,7 +93,7 @@
     {
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/api.py",
-      "line": 18,
+      "line": 17,
       "severity": "medium",
       "description": "Function `healthcheck` is missing a docstring.",
       "rationale": "Public API functions should document their parameters and return values for maintainability.",
@@ -103,36 +103,36 @@
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/db.py",
       "line": 5,
-      "severity": "low",
+      "severity": "medium",
       "description": "Function `get_connection` is missing a docstring.",
-      "rationale": "Even stub/placeholder functions benefit from docstrings explaining their intended contract.",
+      "rationale": "Public functions should be documented to clarify their purpose and return value.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/db.py",
       "line": 10,
-      "severity": "low",
+      "severity": "medium",
       "description": "Function `execute_query` is missing a docstring.",
-      "rationale": "Docstrings clarify the expected query format and return type for callers.",
+      "rationale": "Public functions should be documented to clarify their parameters and return value.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/db.py",
       "line": 15,
-      "severity": "low",
+      "severity": "medium",
       "description": "Function `get_user_by_name` is missing a docstring.",
-      "rationale": "Docstrings are needed to document parameters and return values for maintainability.",
+      "rationale": "Public functions should be documented to clarify their parameters and return value.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/db.py",
       "line": 20,
-      "severity": "low",
+      "severity": "medium",
       "description": "Function `get_users_by_ids` is missing a docstring.",
-      "rationale": "Docstrings are needed to document parameters and return values for maintainability.",
+      "rationale": "Public functions should be documented to clarify their parameters and return value.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
@@ -141,22 +141,22 @@
       "line": 8,
       "severity": "high",
       "description": "Function `get_user` has no corresponding test coverage.",
-      "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+      "rationale": "Untested API endpoints can silently regress; all public API functions should have at least one test.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
       "category": "test_coverage",
       "file": "/data/test_corpus/sample_app_clean/api.py",
-      "line": 13,
+      "line": 12,
       "severity": "high",
       "description": "Function `get_users` has no corresponding test coverage.",
-      "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
+      "rationale": "Untested API endpoints can silently regress; all public API functions should have at least one test.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
       "category": "test_coverage",
       "file": "/data/test_corpus/sample_app_clean/api.py",
-      "line": 18,
+      "line": 17,
       "severity": "medium",
       "description": "Function `healthcheck` has no corresponding test coverage.",
       "rationale": "Even simple functions should be tested to guard against accidental breakage.",
@@ -168,7 +168,7 @@
       "line": 5,
       "severity": "high",
       "description": "Function `get_connection` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "DB layer functions should be tested (even with mocks) to ensure correct behavior.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
@@ -177,7 +177,7 @@
       "line": 10,
       "severity": "high",
       "description": "Function `execute_query` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "Core query execution logic should be tested to catch regressions.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
@@ -186,7 +186,7 @@
       "line": 15,
       "severity": "high",
       "description": "Function `get_user_by_name` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "DB access functions should be tested with mocks to verify query construction and result handling.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
@@ -195,7 +195,7 @@
       "line": 20,
       "severity": "high",
       "description": "Function `get_users_by_ids` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "DB access functions should be tested with mocks to verify query construction and result handling.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
@@ -204,7 +204,7 @@
       "line": 9,
       "severity": "high",
       "description": "Function `formatUserName` has no corresponding test coverage.",
-      "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+      "rationale": "Utility functions should be tested to ensure correct output across typical and edge-case inputs.",
       "source_agent": "style_test_coverage_analyst"
     },
     {
@@ -213,9 +213,9 @@
       "line": 13,
       "severity": "high",
       "description": "Function `f` has no corresponding test coverage.",
-      "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+      "rationale": "Untested functions, especially those with conditional logic (y == 0 branch), can silently produce incorrect results.",
       "source_agent": "style_test_coverage_analyst"
     }
   ],
-  "generated_at": "2026-07-30T00:35:03.378Z"
+  "generated_at": "2026-08-01T01:29:16.779Z"
 }

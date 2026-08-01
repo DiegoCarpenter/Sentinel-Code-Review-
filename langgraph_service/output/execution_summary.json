@@ -2,7 +2,7 @@
   "run_status": "interrupted_by_user",
   "total_steps": 14,
   "completed": {
-    "count": 3,
+    "count": 4,
     "steps": [
       {
         "step_number": 1,
@@ -35,16 +35,34 @@
         "status": "completed"
       },
       {
-        "step_number": 4,
+        "step_number": 5,
         "finding": {
           "category": "test_coverage",
           "file": "/data/test_corpus/sample_app_clean/db.py",
-          "line": 5,
+          "line": 10,
           "severity": "high",
-          "description": "Function `get_connection` has no corresponding test coverage.",
-          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "description": "Function `execute_query` has no corresponding test coverage.",
+          "rationale": "Core query execution logic should be tested to catch regressions.",
           "source_agent": "style_test_coverage_analyst",
-          "id": "db.py:5:test_coverage"
+          "id": "db.py:10:test_coverage"
+        },
+        "dependency_reason": "no dependencies",
+        "status": "completed"
+      },
+      {
+        "step_number": 6,
+        "finding": {
+          "category": "test_coverage",
+          "file": "/data/test_corpus/sample_app_clean/utils.py",
+          "line": 9,
+          "severity": "high",
+          "description": "Function `formatUserName` has no corresponding test coverage.",
+          "rationale": "Utility functions should be tested to ensure correct output across typical and edge-case inputs.",
+          "source_agent": "style_test_coverage_analyst",
+          "id": "utils.py:9:test_coverage",
+          "co_located_categories": [
+            "style"
+          ]
         },
         "dependency_reason": "no dependencies",
         "status": "completed"
@@ -79,16 +97,16 @@
     "count": 1,
     "steps": [
       {
-        "step_number": 5,
+        "step_number": 4,
         "finding": {
           "category": "test_coverage",
           "file": "/data/test_corpus/sample_app_clean/db.py",
-          "line": 10,
+          "line": 5,
           "severity": "high",
-          "description": "Function `execute_query` has no corresponding test coverage.",
-          "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+          "description": "Function `get_connection` has no corresponding test coverage.",
+          "rationale": "DB layer functions should be tested (even with mocks) to ensure correct behavior.",
           "source_agent": "style_test_coverage_analyst",
-          "id": "db.py:10:test_coverage"
+          "id": "db.py:5:test_coverage"
         },
         "dependency_reason": "no dependencies",
         "status": "skip"

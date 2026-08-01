@@ -7,6 +7,15 @@ def calculate_total(items):
 
 
 def formatUserName(first, last):
+    """Return a full name string formatted as '<first> <last>'.
+
+    >>> formatUserName('Jane', 'Doe')
+    'Jane Doe'
+    >>> formatUserName('', 'Doe')
+    ' Doe'
+    >>> formatUserName('Jane', '')
+    'Jane '
+    """
     return f"{first} {last}"
 
 

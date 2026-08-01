@@ -53,7 +53,7 @@
       "line": 5,
       "severity": "high",
       "description": "Function `get_connection` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "DB layer functions should be tested (even with mocks) to ensure correct behavior.",
       "source_agent": "style_test_coverage_analyst",
       "id": "db.py:5:test_coverage"
     },
@@ -67,7 +67,7 @@
       "line": 10,
       "severity": "high",
       "description": "Function `execute_query` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "Core query execution logic should be tested to catch regressions.",
       "source_agent": "style_test_coverage_analyst",
       "id": "db.py:10:test_coverage"
     },
@@ -81,7 +81,7 @@
       "line": 9,
       "severity": "high",
       "description": "Function `formatUserName` has no corresponding test coverage.",
-      "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+      "rationale": "Utility functions should be tested to ensure correct output across typical and edge-case inputs.",
       "source_agent": "style_test_coverage_analyst",
       "id": "utils.py:9:test_coverage",
       "co_located_categories": [
@@ -98,7 +98,7 @@
       "line": 13,
       "severity": "high",
       "description": "Function `f` has no corresponding test coverage.",
-      "rationale": "Untested utility functions can silently break; all public functions should have at least one test.",
+      "rationale": "Untested functions, especially those with conditional logic (y == 0 branch), can silently produce incorrect results.",
       "source_agent": "style_test_coverage_analyst",
       "id": "utils.py:13:test_coverage",
       "co_located_categories": [
@@ -115,21 +115,35 @@
       "line": 15,
       "severity": "high",
       "description": "Function `get_user_by_name` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "DB access functions should be tested with mocks to verify query construction and result handling.",
       "source_agent": "style_test_coverage_analyst",
       "id": "db.py:15:test_coverage"
     },
-    "dependency_reason": "The SQL injection in get_user_by_name must be fixed before writing tests, otherwise tests would be written against vulnerable code and would need to be rewritten."
+    "dependency_reason": "get_user_by_name must be fixed to use parameterized queries before tests are written, otherwise tests would validate insecure behavior."
   },
   {
     "step_number": 9,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/api.py",
+      "line": 8,
+      "severity": "high",
+      "description": "Function `get_user` has no corresponding test coverage.",
+      "rationale": "Untested API endpoints can silently regress; all public API functions should have at least one test.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "api.py:8:test_coverage"
+    },
+    "dependency_reason": "The hardcoded API key should be removed before tests are written to avoid tests depending on or exposing the hardcoded secret.; api.py get_user calls get_user_by_name, so the SQL injection in get_user_by_name must be fixed before meaningful tests for get_user can be written."
+  },
+  {
+    "step_number": 10,
     "finding": {
       "category": "performance",
       "file": "/data/test_corpus/sample_app_clean/db.py",
       "line": 20,
       "severity": "high",
-      "description": "N+1 query pattern: `get_users_by_ids` issues one separate SQL query per user ID in a loop instead of a single batched query.",
-      "rationale": "Each iteration executes a round-trip to the database, so fetching N users costs N queries; a single `SELECT * FROM users WHERE id IN (...)` would reduce this to one query regardless of input size.",
+      "description": "N+1 query pattern: `get_users_by_ids` issues one separate SQL query per user ID instead of a single batched query.",
+      "rationale": "Each iteration of the loop opens a new query execution round-trip to the database; for N ids this produces N queries, causing latency and connection overhead that grows linearly and could be replaced by a single `WHERE id IN (...)` query.",
       "source_agent": "performance_analyst",
       "id": "db.py:20:performance",
       "co_located_categories": [
@@ -137,10 +151,24 @@
         "test_coverage"
       ]
     },
-    "dependency_reason": "Fixing the SQL injection (switching to parameterized queries) and fixing the N+1 pattern (batching into one query) both rewrite get_users_by_ids, so the security fix should be done first to avoid conflicting rewrites."
+    "dependency_reason": "The SQL injection fix (replacing the f-string interpolation with a parameterized batched query) subsumes the N+1 fix, so the security rewrite should be done first to avoid redundant changes to the same loop."
   },
   {
-    "step_number": 10,
+    "step_number": 11,
+    "finding": {
+      "category": "test_coverage",
+      "file": "/data/test_corpus/sample_app_clean/api.py",
+      "line": 12,
+      "severity": "high",
+      "description": "Function `get_users` has no corresponding test coverage.",
+      "rationale": "Untested API endpoints can silently regress; all public API functions should have at least one test.",
+      "source_agent": "style_test_coverage_analyst",
+      "id": "api.py:12:test_coverage"
+    },
+    "dependency_reason": "The hardcoded API key should be removed before tests are written to avoid tests depending on or exposing the hardcoded secret.; api.py get_users calls get_users_by_ids, so the SQL injection in get_users_by_ids must be fixed before meaningful tests for get_users can be written."
+  },
+  {
+    "step_number": 12,
     "finding": {
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/utils.py",
@@ -157,7 +185,7 @@
     "dependency_reason": "style fixes are applied last for utils.py, after utils.py:9:test_coverage; style fixes are applied last for utils.py, after utils.py:13:test_coverage"
   },
   {
-    "step_number": 11,
+    "step_number": 13,
     "finding": {
       "category": "style",
       "file": "/data/test_corpus/sample_app_clean/utils.py",
@@ -174,14 +202,14 @@
     "dependency_reason": "style fixes are applied last for utils.py, after utils.py:9:test_coverage; style fixes are applied last for utils.py, after utils.py:13:test_coverage"
   },
   {
-    "step_number": 12,
+    "step_number": 14,
     "finding": {
       "category": "test_coverage",
       "file": "/data/test_corpus/sample_app_clean/db.py",
       "line": 20,
       "severity": "high",
       "description": "Function `get_users_by_ids` has no corresponding test coverage.",
-      "rationale": "DB layer functions are critical paths that should be tested to catch regressions.",
+      "rationale": "DB access functions should be tested with mocks to verify query construction and result handling.",
       "source_agent": "style_test_coverage_analyst",
       "id": "db.py:20:test_coverage",
       "co_located_categories": [
@@ -189,34 +217,6 @@
         "security"
       ]
     },
-    "dependency_reason": "The SQL injection in get_users_by_ids must be fixed before writing tests, otherwise tests would validate the vulnerable implementation.; The N+1 query pattern in get_users_by_ids should be refactored to a batched query before tests are written, since the fix changes the function's structure and behavior being tested."
-  },
-  {
-    "step_number": 13,
-    "finding": {
-      "category": "test_coverage",
-      "file": "/data/test_corpus/sample_app_clean/api.py",
-      "line": 13,
-      "severity": "high",
-      "description": "Function `get_users` has no corresponding test coverage.",
-      "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
-      "source_agent": "style_test_coverage_analyst",
-      "id": "api.py:13:test_coverage"
-    },
-    "dependency_reason": "The hardcoded API key should be removed before tests are written for get_users, so tests do not embed or depend on the hardcoded secret.; get_users in api.py delegates to get_users_by_ids, so the SQL injection fix must land before tests for get_users are written against a correct implementation.; get_users delegates to get_users_by_ids, so the N+1 refactor should be complete before tests for get_users are written to avoid testing a discarded implementation."
-  },
-  {
-    "step_number": 14,
-    "finding": {
-      "category": "test_coverage",
-      "file": "/data/test_corpus/sample_app_clean/api.py",
-      "line": 8,
-      "severity": "high",
-      "description": "Function `get_user` has no corresponding test coverage.",
-      "rationale": "Untested API entry points can silently regress; all public API functions should have at least one test.",
-      "source_agent": "style_test_coverage_analyst",
-      "id": "api.py:8:test_coverage"
-    },
-    "dependency_reason": "The hardcoded API key should be removed and replaced with a config/env mechanism before tests are written for get_user, so tests are not written around a hardcoded-key assumption.; get_user in api.py delegates to get_user_by_name, so the SQL injection fix must land before tests for get_user are written against a correct implementation.; api.py's get_user calls get_user_by_name which returns data formatted by formatUserName; if formatUserName is renamed, any test for get_user referencing the helper by name must use the updated identifier."
+    "dependency_reason": "get_users_by_ids must be fixed to eliminate SQL injection before tests are written, otherwise tests would validate insecure behavior.; must follow fix to db.py:20:performance (shared function get_users_by_ids)"
   }
 ]
